@@ -1,0 +1,20 @@
+{
+  "version": "0.6.0",
+  "source_sha": "079c4c334a0e9240933d208ecd38c1127526e89c",
+  "target": "x86_64-unknown-linux-gnu",
+  "sha256": "92f6c24778f97b69d2f520b4cc7e9563fc1af81768fcd8d9d9a1fcaac7551d75",
+  "archive_sha256": "e3f5ddb6be4f92fb082cae51c58a7745c7ec3e16a87bc4c984e4ddb5a552e1be",
+  "release_url": "https://github.com/nisshi-io/nisshi/releases/download/v0.6.0/tansu-x86_64-unknown-linux-gnu.tar.gz",
+  "release_tag": "v0.6.0",
+  "asset_name": "tansu-x86_64-unknown-linux-gnu.tar.gz",
+  "license": "Apache-2.0",
+  "min_glibc": "2.39",
+  "wheel_tag": "py3-none-manylinux_2_39_x86_64",
+  "dynamic_dependencies": [
+    "libgcc_s.so.1",
+    "libm.so.6",
+    "libc.so.6",
+    "ld-linux-x86-64.so.2"
+  ],
+  "provenance": "official-prebuilt-release"
+}

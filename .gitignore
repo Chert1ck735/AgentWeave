@@ -1,0 +1,35 @@
+# Local tooling is installed separately from the SDK.
+/superpowers/
+
+# Environments and runtime data
+.venv/
+.agentweave/
+.env
+.env.*
+!.env.example
+.worktrees/
+.claude/
+
+# Local review notes stay out of the repository.
+/docs/reviews/
+
+# Build and test output
+.wheelhouse/
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+.superpowers/
+
+# Generated broker executable; metadata and licenses remain tracked.
+/packages/agentweave-dev/src/agentweave_dev/_bin/
+
+# Official broker archives are verified build inputs, not SDK source.
+/tansu-*.tar.gz
+/packages/agentweave-dev/tansu-*.tar.gz

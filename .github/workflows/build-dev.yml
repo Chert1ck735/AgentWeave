@@ -1,0 +1,39 @@
+name: build-dev
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dev-wheel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.21'
+          python-version: '3.12'
+      - name: Fetch the pinned official broker release
+        run: |
+          url=$(jq -r .release_url packages/agentweave-dev/src/agentweave_dev/manifest.json)
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/tansu.tar.gz" "$url"
+      - name: Verify archive and binary SHA256, ELF and licenses, then package
+        run: uv run --no-project --python 3.12 python scripts/build_dev_broker.py --archive "$RUNNER_TEMP/tansu.tar.gz"
+      - name: The packaged release is exactly the committed manifest
+        run: git diff --exit-code packages/agentweave-dev
+      - name: Build the dev wheel
+        run: uv build --wheel --out-dir dist packages/agentweave-dev
+      - uses: actions/upload-artifact@v4
+        with:
+          name: agentweave-dev-wheel
+          path: dist/*.whl
+          retention-days: 7

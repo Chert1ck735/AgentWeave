@@ -1,0 +1,32 @@
+# HTTP tools defined by configuration alone; copy into agentweave.toml.
+#
+# Publish the toolbox as an independent tool service (tool ID weather.forecast):
+#     agentweave dev run weather --detach
+# or give the same binding to one agent, as "forecaster" below does.
+# WEATHER_TOKEN is read from the environment when the tool is called.
+
+[toolboxes.weather.bindings.forecast]
+kind = "http"
+method = "GET"
+url = "https://api.example.com/v1/forecast"
+description = "Get the weather forecast for a city."
+input_schema = { type = "object", properties = { city = { type = "string" }, days = { type = "integer", minimum = 1, maximum = 7 } }, required = ["city"] }
+output_schema = { type = "object", properties = { temperature = { type = "number" } }, required = ["temperature"] }
+query = { city = { name = "city" }, days = { name = "days" }, units = { value = "metric" } }
+headers = { Authorization = { env = "WEATHER_TOKEN" } }
+timeout = 10
+max_response_bytes = 65536
+
+[agents.forecaster]
+instructions = "Answer weather questions with the forecast tool."
+model = { provider = "openai", model_id = "gpt-5.5-mini" }
+
+[[agents.forecaster.tools]]
+kind = "http"
+name = "forecast"
+method = "GET"
+url = "https://api.example.com/v1/forecast"
+description = "Get the weather forecast for a city."
+input_schema = { type = "object", properties = { city = { type = "string" } }, required = ["city"] }
+query = { city = { name = "city" }, units = { value = "metric" } }
+headers = { Authorization = { env = "WEATHER_TOKEN" } }

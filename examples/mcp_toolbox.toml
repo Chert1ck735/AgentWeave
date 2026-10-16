@@ -1,0 +1,24 @@
+# An MCP server published as an independent tool service; copy into agentweave.toml.
+#
+#     agentweave dev run support --detach
+#
+# publishes support.lookup and support.search from the server's tool list and
+# follows the list as it changes. The stdio server is this service's own child
+# and stops with it; SUPPORT_TOKEN is passed by reference, never written here.
+
+[toolboxes.support]
+kind = "mcp"
+transport = "stdio"
+command = "support-mcp-server"
+args = ["--readonly"]
+env = { SUPPORT_TOKEN = { env = "SUPPORT_TOKEN" } }
+allow = ["lookup", "search"]
+refresh_seconds = 30
+timeout = 30
+
+# A remote server instead (never owned or stopped by AgentWeave):
+# [toolboxes.support]
+# kind = "mcp"
+# transport = "http"
+# url = "https://mcp.example.com/mcp"
+# headers = { Authorization = { env = "SUPPORT_TOKEN" } }

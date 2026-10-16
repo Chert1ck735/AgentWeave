@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentweave-dev"
+version = "0.1.0"
+description = "Verified bundled local broker for AgentWeave on Linux x86_64 with glibc 2.39+"
+requires-python = ">=3.12"
+license = "MIT AND Apache-2.0"  # own code is MIT; the bundled broker is Apache-2.0
+license-files = ["licenses/AGENTWEAVE-LICENSE", "licenses/LICENSE", "licenses/NOTICE", "licenses/THIRD-PARTY-LICENSE.html"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentweave_dev"]
+artifacts = ["src/agentweave_dev/_bin/tansu"]
+
+[tool.hatch.build.targets.wheel.hooks.custom]
+path = "hatch_build.py"

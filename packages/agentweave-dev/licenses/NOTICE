@@ -1,0 +1,4 @@
+This package redistributes the unmodified official Tansu 0.6.0 GNU release.
+Upstream: https://github.com/nisshi-io/nisshi
+Source commit: 079c4c334a0e9240933d208ecd38c1127526e89c
+Apache-2.0; see LICENSE and THIRD-PARTY-LICENSE.html for third-party notices.

@@ -1,0 +1,42 @@
+name: build-wheels
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  wheelhouse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.21'
+          python-version: '3.12'
+      - name: Package the pinned broker release (SHA256 verified)
+        run: |
+          url=$(jq -r .release_url packages/agentweave-dev/src/agentweave_dev/manifest.json)
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/tansu.tar.gz" "$url"
+          uv run --no-project --python 3.12 python scripts/build_dev_broker.py --archive "$RUNNER_TEMP/tansu.tar.gz"
+      - name: Build the wheelhouse (our wheels and hash-locked dependency wheels)
+        run: uv run --no-project --python 3.12 python scripts/build_wheelhouse.py
+      - name: Installed-wheel smoke and documented examples
+        run: |
+          uv venv .venv --python 3.12
+          uv pip install --python .venv/bin/python --offline --no-index --find-links dist/wheelhouse/deps --require-hashes -r requirements/py312.lock
+          .venv/bin/python -m pytest -q -p no:cacheprovider tests/e2e/test_installed_wheels.py tests/e2e/test_documented_examples.py
+      # No upload to any package index: publishing needs a separate, explicit decision.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheelhouse
+          path: dist/wheelhouse/  # our wheels, deps/ and SHA256SUMS covering both
+          retention-days: 7

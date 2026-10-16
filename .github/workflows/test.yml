@@ -1,0 +1,40 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    # glibc 2.39: the pinned dev broker's minimum (packages/agentweave-dev manifest.json).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.21'
+          python-version: ${{ matrix.python }}
+      - name: Install the hash-locked dependencies
+        run: |
+          uv venv .venv --python ${{ matrix.python }}
+          uv pip install --python .venv/bin/python --require-hashes -r requirements/py312.lock
+      - name: Package the pinned broker release (SHA256 verified)
+        run: |
+          url=$(jq -r .release_url packages/agentweave-dev/src/agentweave_dev/manifest.json)
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/tansu.tar.gz" "$url"
+          .venv/bin/python scripts/build_dev_broker.py --archive "$RUNNER_TEMP/tansu.tar.gz"
+      - name: Unit, contract and integration tests
+        run: .venv/bin/python -m pytest -q -p no:cacheprovider tests/unit tests/contract tests/integration
